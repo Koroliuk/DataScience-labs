@@ -1,1 +1,1 @@
-# DataScience-labs
+# data-science-labs
