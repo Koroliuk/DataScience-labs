@@ -28,6 +28,19 @@ anomalies_positions = np.zeros(anomalies)
 for i in range(anomalies):
     anomalies_positions[i] = np.random.randint(0, n)    # рівномірний розкид номерів АВ в межах вибірки розміром 0-n
 
+m_av_pos = np.median(anomalies_positions)
+d_av_pos = np.var(anomalies_positions)
+scv_av_pos = math.sqrt(d_av_pos)
+print('номери АВ: anomalies_positions = ', anomalies_positions)
+print('----- статистичні характеристики РІВНОМІРНОГО закону розподілу ВВ -----')
+print('математичне сподівання ВВ =', m_av_pos)
+print('дисперсія ВВ =', d_av_pos)
+print('СКВ ВВ =', scv_av_pos)
+print('-----------------------------------------------------------------------')
+
+plt.hist(anomalies_positions, bins=10, facecolor="blue", alpha=0.5)
+plt.show()
+
 anomalies_errors = np.random.normal(dm, 3 * dsig, anomalies)    # генерація аномальних значень помилки, які розподілені
                                                                 # за нормальним законом згідно умови, параметри: dm, 3*dsig
 
@@ -191,6 +204,19 @@ filtered_result = np.array(filtered_result)
 # ------------------- Обчислення статистичних характеристик закону -------------------------
 # ----------------------- розподілу випадкової похибки вимірів -----------------------------
 
+# Статистичні характеристики нормальної похибки вимірів
+m_err = np.median(errors)
+d_err = np.var(errors)
+scv_err = math.sqrt(d_err)
+print('------- Статистичні характеристики випадкової НОРМАЛЬНОЇ похибки вимірів -----')
+print('математичне сподівання ВВ =', m_err)
+print('дисперсія ВВ =', d_err)
+print('СКВ ВВ =', scv_err)
+print('------------------------------------------------------------------')
+
+plt.hist(errors, bins=20, facecolor="blue", alpha=0.5)
+plt.show()
+
 # Для вхідної вибірки значень (зашумлена без АВ)
 s0 = np.zeros(n)
 for i in range(n):
@@ -199,6 +225,15 @@ for i in range(n):
 m_s0 = np.median(s0)
 d_s0 = np.var(s0)
 scv_s0 = math.sqrt(d_s0)
+print('------- Статистичні характеристики НОРМАЛЬНОЇ похибки вимірів -----')
+print('------- вхідної вибірки значень (зашумленої без аномальних вимірів) -----')
+print('математичне сподівання ВВ=', m_s0)
+print('дисперсія ВВ =', d_s0)
+print('СКВ ВВ=', scv_s0)
+print('------------------------------------------------------------------')
+
+plt.hist(s0, bins=20, facecolor="blue", alpha=0.5)
+plt.show()
 
 # Для аномальної вибірки (зашумлена з АВ)
 s1 = np.zeros(n)
@@ -208,6 +243,15 @@ for i in range(n):
 m_s1 = np.median(s1)
 d_s1 = np.var(s1)
 scv_s1 = math.sqrt(d_s1)
+print('------- Статистичні характеристики НОРМАЛЬНОЇ похибки вимірів -----')
+print('-------  аномальної вибірки (зашумленої з аномальними вимірами) -----')
+print('математичне сподівання ВВ=', m_s1)
+print('дисперсія ВВ =', d_s1)
+print('СКВ ВВ=', scv_s1)
+print('------------------------------------------------------------------')
+
+plt.hist(s1, bins=20, facecolor="blue", alpha=0.5)
+plt.show()
 
 # Результати згладжування
 s2 = np.zeros(len(filtered_result))
@@ -217,6 +261,15 @@ for i in range(len(filtered_result)):
 m_s2 = np.median(s2)
 d_s2 = np.var(s2)
 scv_s2 = math.sqrt(d_s2)
+print('------- Статистичні характеристики НОРМАЛЬНОЇ похибки вимірів -----')
+print('------- результатів згладжування МНК -----')
+print('математичне сподівання ВВ=', m_s2)
+print('дисперсія ВВ =', d_s2)
+print('СКВ ВВ=', scv_s2)
+print('------------------------------------------------------------------')
+
+plt.hist(s2, bins=20, facecolor="blue", alpha=0.5)
+plt.show()
 
 # -------------------------- Відображення результатів розрахунків ------------------------------
 # Табличкою
