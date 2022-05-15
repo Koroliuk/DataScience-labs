@@ -3,16 +3,16 @@ import pandas as pd
 
 # ------------------------------------- сегмент API ------------------------------------
 # Шлях до файлу з вхідними даними
-input_data_file_path = "/home/koroliuk/PycharmProjects/DataScience-labs/lab4/data.xlsx"
-elements = ["Сайт1", "Сайт2", "Сайт3", "Сайт4",
-            "Сайт5", "Сайт6", "Сайт7", "Сайт8",             # Масив, що містить назви колонок елементів дослідження
-            "Сайт9", "Сайт10", "Сайт11", "Сайт12"]
+input_data_file_path = ".//data.xlsx"
+elements = ["Приватбанк", "Укргазбанк", "Ощадбанк", "Креді Агріколь Банк",     # Масив, що містить назви колонок елементів дослідження
+            "Акордбанк", "Прокредит Банк", "ОТП Банк", "Таскомбанк"]
+
 criteria_column = "Критерій"                                # Назва колонки, яка визначає природу критерію фактора
 
 G = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]        # Масив, що містить вагові коефіцієнти факторів
 G_group = [1, 1, 1, 1]                                      # Масив, що містить вагові коефіцієнти груп факторів
 
-d = 0.1                                                     # Коефіцієнт запасу
+d = 0.001                                                   # Відносний коефіцієнт запасу
 
 factors_count = len(G)                                      # Кількість факторів
 group_count = len(G_group)                                  # Кількість елементів
@@ -51,12 +51,14 @@ for i in range(factors_count):
     factor = factors[i]
     if criteria[i] == 'min':
         max_value = max(factor)
+        error = max(d * max_value, d)       # будуємо масштабоване допустиме відхилення
         for j in range(elements_count):
-            factors_normalized[i, j] = factor[j] / (max_value + d)
+            factors_normalized[i, j] = factor[j] / (max_value + error)
     else:
         min_value = min(factor)
+        error = max(d * min_value, d)       # будуємо масштабоване допустиме відхилення
         for j in range(elements_count):
-            factors_normalized[i, j] = (min_value - d) / factor[j]
+            factors_normalized[i, j] = (min_value - error) / factor[j]
 
 # Проводимо зведення часткових факторів до узагальнених за групою
 factors_by_group = np.zeros((group_count, elements_count), float)
@@ -66,11 +68,11 @@ for i in range(elements_count):
         factors_by_group[0, i] += G_normalized[j] * (1 - factors_normalized[j, i]) ** (-1)
 
     # Формуємо значення другої групи (робота з сайтом)
-    for j in range(3, 10):
+    for j in range(3, 7):
         factors_by_group[1, i] += G_normalized[j] * (1 - factors_normalized[j, i]) ** (-1)
 
     # Формуємо значення третьої групи (технічні)
-    for j in range(10, 12):
+    for j in range(7, 12):
         factors_by_group[2, i] += G_normalized[j] * (1 - factors_normalized[j, i]) ** (-1)
 
     # Формуємо значення четвертої групи (економічні)
@@ -82,13 +84,13 @@ factors_normalized_maximum = np.zeros((factors_count, elements_count), float)
 for i in range(factors_count):
     factor = factors[i]
     if criteria[i] == 'min':
-        max_value = max(factor)
         for j in range(elements_count):
-            factors_normalized_maximum[i, j] = factor[j] / (factor[j] + d)
+            error = max(d * factor[j], d)  # будуємо масштабоване допустиме відхилення
+            factors_normalized_maximum[i, j] = factor[j] / (factor[j] + error)
     else:
-        min_value = min(factor)
         for j in range(elements_count):
-            factors_normalized_maximum[i, j] = (factor[j] - d) / factor[j]
+            error = max(d * factor[j], d)  # будуємо масштабоване допустиме відхилення
+            factors_normalized_maximum[i, j] = (factor[j] - error) / factor[j]
 
 # Формуємо з отриманих значень масив, що містить вже максимальні значення для груп факторів
 factors_by_group_maximum = np.zeros((group_count, elements_count), float)       # Масив, що містить нормовані
@@ -98,11 +100,11 @@ for i in range(elements_count):
         factors_by_group_maximum[0, i] += G_normalized[j] * (1 - factors_normalized_maximum[j, i]) ** (-1)
 
     # Формуємо значення другої групи
-    for j in range(3, 10):
+    for j in range(3, 7):
         factors_by_group_maximum[1, i] += G_normalized[j] * (1 - factors_normalized_maximum[j, i]) ** (-1)
 
     # Формуємо значення третьої групи
-    for j in range(10, 12):
+    for j in range(7, 12):
         factors_by_group_maximum[2, i] += G_normalized[j] * (1 - factors_normalized_maximum[j, i]) ** (-1)
 
     # Формуємо значення четвертої групи
@@ -129,7 +131,7 @@ for i in range(group_count):
 max_res = sum(maximum_group_values)
 
 result_in_single_scale = np.zeros(elements_count, float)    # Масив, що містить рішення багатокритеріальної
-for i in range(elements_count):                             # задачі в єдииній шкалі
+for i in range(elements_count):                             # задачі в єдиній шкалі
     result_in_single_scale[i] = 1 - result[i] / max_res
 
 # Пошук оптимального варіанту
