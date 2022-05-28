@@ -1,6 +1,4 @@
 import datetime
-import re
-from multiprocessing import Process, Lock
 
 import requests
 from bs4 import BeautifulSoup as bs
@@ -19,14 +17,12 @@ base_url = 'https://index.minfin.com.ua/ua/reference/coronavirus/ukraine'
 region_name = 'Хмельницька'
 
 start_date = datetime.date(2020, 3, 28)
-end_date = datetime.date(2022, 2, 24)
-# end_date = datetime.date(2020, 4, 10)
+# end_date = datetime.date(2022, 2, 24)
+end_date = datetime.date(2020, 4, 10)
 delta = datetime.timedelta(days=1)
 
 
-def get_values_from_date(date, lock):
-    full_url = base_url + '/' + str(date) + '/'
-    response = requests.get(full_url)
+def get_values_from_response(response):
     if response.ok:
         soup = bs(response.text, 'lxml')
         region_href = soup.find('a', href='reference/coronavirus/ukraine/hmelnickaya/')
@@ -35,28 +31,20 @@ def get_values_from_date(date, lock):
         for i in range(4):
             found = region_data[i].contents[0]
             if found.name != 'br':
-                lock.acquire()
                 data[i].append(int(found))
-                lock.release()
             else:
-                lock.acquire()
                 data[i].append(0)
-                lock.release()
     else:
         print('Connection issues')
 
 
-proc_lock = Lock()
-procs = []
 start_time = datetime.datetime.now()
+session = requests.Session()
 while start_date <= end_date:
-    proc = Process(target=get_values_from_date(start_date, proc_lock))
-    proc.start()
-    procs.append(proc)
+    full_url = base_url + '/' + str(start_date) + '/'
+    request_response = session.get(full_url)
+    get_values_from_response(request_response)
     start_date += delta
 
-for proc in procs:
-    proc.join()
-
 print(f'Time taken {datetime.datetime.now()-start_time}')
-print(data)
+# print(data)
