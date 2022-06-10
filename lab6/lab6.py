@@ -1,3 +1,4 @@
+import datetime
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -6,11 +7,10 @@ from bs4 import BeautifulSoup as bs
 import tensorflow as tf
 from tensorflow import keras
 
-
 # ------------------------------------- сегмент API ------------------------------------
-url = 'https://www.weather25.com/europe/ukraine'        # інтернет-джерело
-observation_period = 'February'                         # період спостереження
-period_to_compare = ['March', 'April', 'May']           # період передбачення
+url = 'https://www.weather25.com/europe/ukraine'  # інтернет-джерело
+observation_period = 'February'  # період спостереження
+period_to_compare = ['March', 'April', 'May']  # період передбачення
 
 
 # ------------------------------------- Завантаження даних ------------------------------------
@@ -76,6 +76,7 @@ plt.ylabel("Середня температура дня")
 plt.legend()
 plt.show()
 
+
 # ------------------------------------- Прогноз за допомогою МНК ------------------------------------
 # Функція, що повертає вектор виміряних даних
 # Вхідні параметри:
@@ -92,10 +93,11 @@ def get_vector_of_measured_data(arr):
 # Вхідні параметри:
 #   n - розмір матриці
 def get_matrix_of_basic_function_values(n):
-    result = np.ones((n, 3))
+    result = np.ones((n, 4))
     for i in range(n):
         result[i, 1] = float(i)
         result[i, 2] = float(i * i)
+        result[i, 3] = float(i * i * i)
     return result
 
 
@@ -131,13 +133,13 @@ def least_squares_extrapolation(arr, forecast_value):
     j = n + 1
     predicted_values = []
     for i in range(0, forecast_value):
-        predicted_values.append(C[0, 0] + C[1, 0] * j + (C[2, 0] * j * j))
+        predicted_values.append(C[0, 0] + C[1, 0] * j+ C[2, 0] * j * j+ C[3, 0] * j * j * j)
         j = j + 1
     return predicted_values
 
 
 trend = least_squares(input_data)
-MNK_prediction = trend+least_squares_extrapolation(input_data, len(data_to_compare))
+MNK_prediction = trend + least_squares_extrapolation(input_data, len(data_to_compare))
 
 # Візуалізація треду
 plt.plot(input_data, label="Дані періоду спостереження")
@@ -154,7 +156,6 @@ plt.xlabel("День")
 plt.ylabel("Середня температура дня")
 plt.legend()
 plt.show()
-
 
 # ------------------------------------- Прогноз за допомогою нейромережі ------------------------------------
 n = len(input_data)
@@ -190,7 +191,6 @@ plt.xlabel("День")
 plt.ylabel("Середня температура дня")
 plt.legend()
 plt.show()
-
 
 # ------------------------------------- Порівняння прогнозів МНК та нейромережі ------------------------------------
 # Обчислення статистичних характеристик
@@ -229,3 +229,10 @@ plt.xlabel("День")
 plt.ylabel("Середня температура дня")
 plt.legend()
 plt.show()
+
+# Порівняння результатів прогнозу за різними методами
+start_date = datetime.datetime(2022, 2, 1)
+for i in range(len(input_data), len(real_data)):
+    date = start_date + datetime.timedelta(days=i)
+    print(date.date(), " прогноз МНК: ", MNK_prediction[i], " прогноз нейромережі: ", ml_predicted[i][0],
+          " реальні дані ", real_data[i])
