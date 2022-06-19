@@ -80,8 +80,8 @@ def least_squares(arr, degree):
     return np.polyval(fitted_pn, arr_x)
 
 
-sales_trend = least_squares(sales, 1)
-profit_trend = least_squares(profit, 1)
+sales_trend = least_squares(sales, 2)
+profit_trend = least_squares(profit, 2)
 
 # Візуалізація отриманих даних
 plt.plot(sales, label="Продажі")
@@ -111,8 +111,8 @@ def least_squares_extrapolation(arr, forecast, degree):
     return np.polyval(fitted_pn, total_x)
 
 
-sales_prediction = least_squares_extrapolation(sales, forecast_value, 1)
-profit_prediction = least_squares_extrapolation(profit, forecast_value, 1)
+sales_prediction = least_squares_extrapolation(sales, forecast_value, 2)
+profit_prediction = least_squares_extrapolation(profit, forecast_value, 2)
 
 # Візуалізація отриманих даних
 # Графіком
