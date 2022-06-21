@@ -14,6 +14,7 @@ images = os.listdir(inputDir)
 for image in images:
     full_path = os.path.join(inputDir, image)
     img = cv2.imread(full_path)
+    img = cv2.detailEnhance(img, sigma_s=10, sigma_r=0.15)
     height, width = img.shape[:2]
     blob = cv2.dnn.blobFromImage(img, 1.0, (300, 300), (104.0, 117.0, 123.0))
 
